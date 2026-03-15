@@ -1,35 +1,29 @@
 import { NextResponse } from "next/server";
-import { buildSchedulePrompt } from "@/lib/ai";
-import type { ScheduleItem } from "@/types/schedule";
+import { generateSchedule } from "@/lib/ai";
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  try {
+    const body = await request.json();
 
-  const goal = body.goal ?? "Study";
-  const hours = Number(body.hoursPerWeek ?? 4);
+    const goal = body.goal?.trim() || "Study";
+    const hours = Number(body.hoursPerWeek ?? 4);
+    const fixedCommitments = body.fixedCommitments?.trim() || "None";
+    const bestFocusTime = body.bestFocusTime?.trim() || "afternoon";
 
-  const prompt = buildSchedulePrompt(goal, hours);
+    const schedule = await generateSchedule(
+      goal,
+      hours,
+      fixedCommitments,
+      bestFocusTime
+    );
 
-  console.log("Prompt that will go to AI:");
-  console.log(prompt);
+    return NextResponse.json({ schedule });
+  } catch (error) {
+    console.error("Failed to generate schedule:", error);
 
-  // mock result for now
-  const schedule: ScheduleItem[] = [
-    {
-      day: "Monday",
-      task: `${goal} Practice`,
-      startTime: "1:00 PM",
-      endTime: "2:30 PM",
-      type: "deep_work",
-    },
-    {
-      day: "Wednesday",
-      task: `${goal} Review`,
-      startTime: "2:00 PM",
-      endTime: "3:00 PM",
-      type: "review",
-    },
-  ];
-
-  return NextResponse.json({ schedule });
+    return NextResponse.json(
+      { error: "Failed to generate schedule" },
+      { status: 500 }
+    );
+  }
 }
