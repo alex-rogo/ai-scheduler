@@ -1,3 +1,5 @@
+import Icon from "@/components/Icon";
+
 type GoalFormProps = {
   goal: string;
   hoursPerWeek: string;
@@ -11,81 +13,78 @@ type GoalFormProps = {
   isLoading: boolean;
 };
 
-export default function GoalForm({
-  goal,
-  hoursPerWeek,
-  fixedCommitments,
-  bestFocusTime,
-  onGoalChange,
-  onHoursChange,
-  onFixedCommitmentsChange,
-  onBestFocusTimeChange,
-  onGeneratePlan,
-  isLoading,
-}: GoalFormProps) {
+export default function GoalForm(props: GoalFormProps) {
   return (
-    <div className="mt-8 space-y-5">
-      <div>
-        <label className="mb-2 block text-sm font-medium text-zinc-300">
-          Goal
-        </label>
-        <input
-          type="text"
-          value={goal}
-          onChange={(e) => onGoalChange(e.target.value)}
-          placeholder="Learn computer science"
-          className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3 text-white outline-none"
-        />
+    <form
+      className="goal-form"
+      onSubmit={(event) => {
+        event.preventDefault();
+        props.onGeneratePlan();
+      }}
+    >
+      <label htmlFor="goal">Goal</label>
+      <textarea
+        id="goal"
+        value={props.goal}
+        onChange={(event) => props.onGoalChange(event.target.value)}
+        placeholder="e.g. Complete a TypeScript course"
+        rows={3}
+        required
+        maxLength={2000}
+      />
+      <div className="form-row">
+        <div>
+          <label htmlFor="hours">Hours per week</label>
+          <div className="hours-input">
+            <input
+              id="hours"
+              type="number"
+              min="1"
+              max="112"
+              step="0.5"
+              required
+              placeholder="10"
+              value={props.hoursPerWeek}
+              onChange={(event) => props.onHoursChange(event.target.value)}
+            />
+            <span>hrs</span>
+          </div>
+        </div>
+        <div>
+          <label htmlFor="focus">Focus time</label>
+          <select
+            id="focus"
+            value={props.bestFocusTime}
+            onChange={(event) =>
+              props.onBestFocusTimeChange(event.target.value)
+            }
+          >
+            <option value="morning">Morning</option>
+            <option value="afternoon">Afternoon</option>
+            <option value="evening">Evening</option>
+          </select>
+        </div>
       </div>
-
-      <div>
-        <label className="mb-2 block text-sm font-medium text-zinc-300">
-          Hours per week
-        </label>
-        <input
-          type="number"
-          value={hoursPerWeek}
-          onChange={(e) => onHoursChange(e.target.value)}
-          placeholder="10"
-          className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3 text-white outline-none"
-        />
-      </div>
-
-      <div>
-        <label className="mb-2 block text-sm font-medium text-zinc-300">
-          Fixed commitments
-        </label>
-        <textarea
-          value={fixedCommitments}
-          onChange={(e) => onFixedCommitmentsChange(e.target.value)}
-          placeholder="Class Mon-Thu 9-11, Gym Tue 6-7"
-          rows={3}
-          className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3 text-white outline-none"
-        />
-      </div>
-
-      <div>
-        <label className="mb-2 block text-sm font-medium text-zinc-300">
-          Best focus time
-        </label>
-        <select
-          value={bestFocusTime}
-          onChange={(e) => onBestFocusTimeChange(e.target.value)}
-          className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3 text-white outline-none"
-        >
-          <option value="morning">Morning</option>
-          <option value="afternoon">Afternoon</option>
-          <option value="evening">Evening</option>
-        </select>
-      </div>
-
+      <label htmlFor="commitments">
+        Fixed commitments <span>Optional</span>
+      </label>
+      <textarea
+        id="commitments"
+        rows={2}
+        maxLength={4000}
+        value={props.fixedCommitments}
+        onChange={(event) => props.onFixedCommitmentsChange(event.target.value)}
+        placeholder="e.g. Work Mon–Fri, 9–5. Gym on Tuesday."
+      />
       <button
-        onClick={onGeneratePlan}
-        disabled={isLoading}
-        className="w-full rounded-2xl bg-white px-4 py-3 font-semibold text-zinc-900 disabled:cursor-not-allowed disabled:opacity-60"
+        className="generate-button"
+        disabled={props.isLoading}
+        type="submit"
       >
-        {isLoading ? "Generating..." : "Generate Plan"}
+        <Icon name="sparkles" size={17} />
+        {props.isLoading ? "Generating…" : "Generate schedule"}
+        {!props.isLoading && <Icon name="arrow" size={17} />}
       </button>
-    </div>
+    </form>
   );
 }

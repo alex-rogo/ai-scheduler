@@ -1,82 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GetCracked AI Scheduler
 
-## Getting Started
+A Next.js scheduling workspace that turns a goal, a weekly time budget, fixed commitments, and a preferred focus time into a Gemini-generated plan.
 
-First, run the development server:
+## Run locally
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```sh
+npm ci
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create `.env.local` in this directory with your own key:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```dotenv
+GEMINI_API_KEY=your_gemini_api_key
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```sh
+npm run dev
+```
 
-## Learn More
+Open http://localhost:3000. The interface works without a key using a clearly labeled example schedule; generating a personal plan requires the key. Environment files are ignored by Git.
 
-To learn more about Next.js, take a look at the following resources:
+## Interface
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Dark three-column workspace with a mini calendar and activity filters.
+- Day, week, and month views with date navigation and a Today shortcut.
+- Click any session for its full title, day, time, and activity category.
+- The Tasks view lists every returned session, including any with times that cannot be placed on the calendar.
+- Open the weekly planner with a + button; all four planning inputs still feed the Gemini endpoint.
+- The chat-style assistant summarizes the selected day and finds free blocks of a requested duration. These helpers run locally; Gemini is used for generating weekly plans.
+- Reminders support titles, optional due dates, editing, completion, deletion, and undo. They persist in browser local storage; due dates do not trigger system notifications.
+- Home summarizes today’s sessions; Tasks lists scheduled sessions. Notes and Projects are omitted.
+- Keyboard shortcuts: Ctrl/Cmd+B toggles the sidebar; Ctrl/Cmd+Shift+P opens the planner.
+- Mobile navigation and assistant drawers keep the calendar usable on small screens.
+- Request failures preserve the current plan and show an inline retry message.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Schedules are held in page state, not persisted. Refreshing restores the example schedule. Generated weekday names are anchored to the Monday–Sunday week in which generation completes, using the browser's local time zone. The initial example contains sessions for today only.
 
-## Deploy on Vercel
+## Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `app/page.tsx`: workspace state, navigation, generation request, and assistant panel.
+- `components/Calendar.tsx`: day/week timeline, month grid, and event blocks.
+- `components/GoalForm.tsx`: accessible, validated planning form.
+- `components/Assistant.tsx`: schedule summaries, available-time queries, and planner entry points.
+- `components/Reminders.tsx`: reminder CRUD, filtering, due dates, and browser persistence.
+- `lib/reminders.ts`: reminder validation and sorting.
+- `components/Icon.tsx`: shared SVG icons.
+- `lib/calendar.ts`: date/time helpers, response validation, categories, and example data.
+- `lib/ai.ts`: server-side Gemini call and structured response schema.
+- `app/api/generate-schedule/route.ts`: existing POST endpoint.
+- `types/schedule.ts`: shared schedule model.
+- `app/globals.css`: theme, layouts, responsive styles, and interaction states.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Checks
 
-# GetCracked AI Scheduler
+```sh
+npm run lint
+npm run build
+```
 
-AI-powered productivity planner that converts goals into realistic weekly schedules.
-
-Stack:
-- Next.js
-- TypeScript
-- Tailwind
-- API routes
-
-Future:
-- OpenAI schedule generation
-- Supabase persistence
-- Timeline UI
-
-# GetCracked AI Scheduler
-
-A startup-style AI scheduling app that turns user goals into structured weekly schedules.
-
-## Current Stack
-- Next.js
-- TypeScript
-- Tailwind CSS
-
-## Current Features
-- Goal input form
-- Hours-per-week input
-- Mock backend API route
-- Schedule cards UI
-- Shared schedule types
-- Loading state
-
-## Current Architecture
-- `app/page.tsx` = main page
-- `components/` = reusable UI pieces
-- `app/api/generate-schedule/route.ts` = backend route
-- `types/schedule.ts` = shared schedule shape
-- `lib/ai.ts` = future AI prompt logic
-
-## Next Steps
-- Add fixed commitments input
-- Add energy pattern input
-- Integrate OpenAI
-- Save schedules to database
-- Build Today / Week views
+Stack: Next.js 16, React 19, TypeScript, Tailwind CSS 4, and `@google/genai`. The model is `gemini-2.5-flash`. No database or authentication service is required.

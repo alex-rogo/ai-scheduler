@@ -1,16 +1,13 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { ScheduleItem } from "@/types/schedule";
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
-
 export async function generateSchedule(
   goal: string,
   hours: number,
   fixedCommitments: string,
-  bestFocusTime: string
+  bestFocusTime: string,
 ): Promise<ScheduleItem[]> {
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   const prompt = `
 Create a realistic weekly schedule for this user.
 
@@ -25,6 +22,9 @@ Important rules:
 - Use these types only: deep_work, review, exercise, break.
 - Times should be realistic and readable like "1:00 PM".
 - Each item must include day, task, startTime, endTime, and type.
+- Use full English weekday names (Monday through Sunday) for day.
+- Use h:mm AM/PM for times. End each session on the same day, after its start.
+- Avoid overlaps and fixed commitments. Match the requested weekly hours.
 `;
 
   const response = await ai.models.generateContent({
